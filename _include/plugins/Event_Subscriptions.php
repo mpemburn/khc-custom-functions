@@ -112,7 +112,29 @@ if ( ! class_exists( 'Event_Subscriptions' ) ) {
 
         public function download_subscriber_list()
         {
-            echo 'YoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYoYo';
+            $post_id = $_REQUEST['postID'];
+
+            $subscriber_array = get_post_meta( $post_id, "event-subscribers", true );
+
+            if ( !empty( $subscriber_array ) ) {
+                $file = fopen('php://output', 'w');
+
+                fputcsv($file, ['Name', 'Email']);
+
+                foreach ($subscriber_array as $subscriber ) {
+                    if ($subscriber['name'] && $subscriber['active'] === 'yes') {
+                        fputcsv($file, [$subscriber['name'], $subscriber['email']]);
+                    }
+                }
+
+                $response = fgetcsv($file);
+
+                fclose($file);
+
+                // response output
+                echo $response;
+            }
+
             wp_die();
 		}
 
@@ -155,15 +177,21 @@ if ( ! class_exists( 'Event_Subscriptions' ) ) {
 
                         jQuery.ajax({
                             type: "post",
-                            dataType: "json",
                             url: "/wp-admin/admin-ajax.php",
                             data: {
-                                action:'download_subscribers'
+                                action:'download_subscribers',
+                                postID: <?php echo $post->ID; ?>
+
                             },
-                            success: function(msg){
-                                console.log(msg);
+                            success: function(csv){
+                                var rightNow = new Date();
+                                var dateString = rightNow.toISOString().slice(0,16).replace(/[-:T]+/g,"");
+                                var link = document.createElement('a');
+                                link.download = 'subscribers_' + dateString + '.csv';
+                                link.href = 'data:text/csv;charset=utf-8,' + csv;
+                                link.click();
                             },
-                            failure: function(msg){
+                            error: function(msg){
                                 console.log(msg);
                             }
                         });
