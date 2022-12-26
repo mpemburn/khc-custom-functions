@@ -8,7 +8,7 @@ Plugin Name: KHC Custom Functions
 Plugin URI:
 Description: Theme-agnostic actions, filters, shortcodes, etc..
 Author: Mark Pemburn
-Version: 1.2
+Version: 1.2.1
 Author URI: http://www.sacredwheel.org/khc
 */
 
